@@ -8,15 +8,15 @@ module.exports = function(featArr){
     var properties = [];
 
     var onFeat = {}
+
     for(i in featArr){
-        console.log('feat getting split, ', featArr[i]);
+      //  console.log('feat getting split, ', featArr[i]);
 
       var jsonFeat = JSON.parse(featArr[i].slice(0,-2));
 
 
         var pufeat = geojsonfeature(featArr[i]);
 
-    //    console.log(pufeat)
 
         geojsonFeats.push(pufeat);
 
@@ -36,7 +36,6 @@ module.exports = function(featArr){
 
 
 function geojsonfeature(feature, properties, geometry){
-  console.log(typeof(feature))
 
   var featObj = JSON.parse(feature.slice(0,-2));
 

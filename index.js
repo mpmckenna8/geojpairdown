@@ -52,7 +52,7 @@ module.exports = function(infi, outname){
 
     geoStream.on('end', function(d){
 
-     console.log('stream done with ', typeof(geoString), geoString.length)
+    // console.log('stream done with ', typeof(geoString), geoString.length)
 
      //console.log(geoString)
      var go = JSON.parse(geoString);
@@ -94,11 +94,9 @@ module.exports = function(infi, outname){
       geoJsonWrite.write(featuresIndex);
       jsonWriteStream.write('{');
 
-      //console.log(featuresIndex + "]\n}");
 
       geojsonObjTester = JSON.parse(featuresIndex + "]\n}");
     //  console.log('got a good start')
-    //  console.log(featuresIndex)
 
       var features = '';
 
@@ -109,7 +107,6 @@ module.exports = function(infi, outname){
         var newfeature = '{ "type": "Feature"' + d;
 
         return newfeature;
-      //  console.log(d)
       })
 
       finFeats = incomFeats.filter(function(d){
@@ -148,7 +145,7 @@ module.exports = function(infi, outname){
 
         console.log('got ' + geojsonObjTester.features.length + ' valid features for this geojson');
 
-        console.log('finFeats in start ', finFeats)
+    //    console.log('finFeats in start ', finFeats)
         var writeArr = splitup(finFeats);
         console.log('things to write to file', writeArr[0].length)
 
@@ -211,7 +208,6 @@ module.exports = function(infi, outname){
       function splitFeatures(featStr){
 
         var splfeatEnds = featStr.split('] } },\n')
-        console.log(splfeatEnds.length)
         var blah;
 
          blah = splfeatEnds.map(function(d){
@@ -249,7 +245,7 @@ module.exports = function(infi, outname){
         var features = splitFeat[1];
 
           for(i in geoFeats){
-            console.log(features[i])
+      //      console.log(features[i])
 
             var simpFeat = features[i].osm_id + ":" + JSON.stringify(features[i]) + ','
 
@@ -263,7 +259,7 @@ module.exports = function(infi, outname){
                 simpgeo += ',\n';
             }
 
-            console.log(simpgeo)
+        //    console.log(simpgeo)
 
             geoJsonWrite.write(simpgeo);
 
