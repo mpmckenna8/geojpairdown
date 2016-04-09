@@ -118,7 +118,6 @@ module.exports = function(infi, outname){
 
 
 
-
         if(finFeats.length !=  featArr.length){
 
           nextFeatStart = '{ "type": "Feature"' + featArr[featArr.length-1];
@@ -156,7 +155,8 @@ module.exports = function(infi, outname){
         geojsonObjTester.features = [];
 
 
-      }
+    }
+
 
 
 
@@ -167,7 +167,8 @@ module.exports = function(infi, outname){
       function nextFeatures(blob){
       //  console.log(nextFeatStart + blob.toString())
 
-        geoJsonWrite.write(',\n')
+        geoJsonWrite.write(',\n');
+        jsonWriteStream.write(',\n');
 
         var newFeatStr = nextFeatStart + blob.toString();
 
@@ -232,7 +233,6 @@ module.exports = function(infi, outname){
           nextFeatStart = lastie;
         }
 
-
         return blah
 
       }
@@ -245,9 +245,13 @@ module.exports = function(infi, outname){
         var features = splitFeat[1];
 
           for(i in geoFeats){
-      //      console.log(features[i])
+            console.log('length of feats to write', features.length)
 
-            var simpFeat = features[i].osm_id + ":" + JSON.stringify(features[i]) + ','
+            var simpFeat = '"' + features[i].osm_id + '":' + JSON.stringify(features[i]);
+            if(i < features.length-1){
+            //  console.log('heyyyyyyy')
+                simpFeat +=  ',\n'
+                }
 
             jsonWriteStream.write(simpFeat);
 
