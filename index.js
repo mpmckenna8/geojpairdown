@@ -8,7 +8,9 @@ var splitup = require('./splitup');
 
 
 module.exports = function(infi, outname){
+  var commandfi = process.argv[2] || infi;
 
+  console.log('comm fi;', commandfi)
 
     console.log(infi,outname)
 
@@ -76,6 +78,11 @@ module.exports = function(infi, outname){
 
 
 
+
+
+
+
+
     function startIt(q){
     //  var strbuff = .toString();
     //  find the "features" string and end the object there with a header
@@ -118,16 +125,12 @@ module.exports = function(infi, outname){
 
       })
 
-
-
         if(finFeats.length !=  featArr.length){
 
           nextFeatStart = '{ "type": "Feature"' + featArr[featArr.length-1];
 
       //    console.log('got this extra', nextFeatStart)
         }
-
-
 
 
         finFeats.map(function(mayFeat){
@@ -163,6 +166,8 @@ module.exports = function(infi, outname){
 
 
 
+
+
       // nextFeatures takes the next data chunk, segments it by feat while adding nextFeatStart to the
       // beginnging of the first objsct and then adding all those features to the geojsonObjTester.features
       //
@@ -185,8 +190,6 @@ module.exports = function(infi, outname){
             var featObj = JSON.parse(fea);
             geojsonObjTester.features.push(featObj);
 
-
-
             return (fea + ',\n')
           })
 
@@ -203,9 +206,11 @@ module.exports = function(infi, outname){
         var writeArr = splitup(finFeats);
         writeToFile(writeArr);
 
-
-
       }
+
+
+
+
 
 
       function splitFeatures(featStr){
@@ -241,12 +246,16 @@ module.exports = function(infi, outname){
 
 
 
+
+
+
       // add geoFeats to geoJsonWrite and simp feats to jsonWriteStream
       function writeToFile(splitFeat){
         var geoFeats = splitFeat[0];
         var features = splitFeat[1];
 
           for(i in geoFeats){
+
 
             var simpFeat = '"' + features[i].osm_id + '":' + JSON.stringify(features[i]);
             if(i < features.length-1){
@@ -273,5 +282,7 @@ module.exports = function(infi, outname){
         //  console.log(geoFeats);
 
       }
+
+
 
 }
