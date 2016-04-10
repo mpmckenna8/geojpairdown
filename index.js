@@ -62,7 +62,9 @@ module.exports = function(infi, outname){
 
     jsonWriteStream.write('}')
 
-    geoJsonWrite.write('\n]}')
+    geoJsonWrite.write('\n]}');
+
+    return true;
 
     })
 
@@ -80,7 +82,7 @@ module.exports = function(infi, outname){
 
 
 
-      console.log('index start of feats: ', q.toString().indexOf('features": ['))
+    //  console.log('index start of feats: ', q.toString().indexOf('features": ['))
       var datString = q.toString();
 
       var geoStarter = q.toString().indexOf('features": [')
@@ -146,7 +148,7 @@ module.exports = function(infi, outname){
 
     //    console.log('finFeats in start ', finFeats)
         var writeArr = splitup(finFeats);
-        console.log('things to write to file', writeArr[0].length)
+      //  console.log('things to write to file', writeArr[0].length)
 
         writeToFile(writeArr);
 
@@ -245,7 +247,6 @@ module.exports = function(infi, outname){
         var features = splitFeat[1];
 
           for(i in geoFeats){
-            console.log('length of feats to write', features.length)
 
             var simpFeat = '"' + features[i].osm_id + '":' + JSON.stringify(features[i]);
             if(i < features.length-1){
@@ -272,6 +273,5 @@ module.exports = function(infi, outname){
         //  console.log(geoFeats);
 
       }
-
 
 }
