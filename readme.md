@@ -25,3 +25,15 @@ caveats:
   right now designed just to handle OSM files coming out of qgis in geojson format.
   only designed/tested with polygon features.
   a bunch of sloppy console.log ing
+
+
+What's going on
+
+In index js
+
+Initialize all the filestreams
+
+On each data event the first chunk gets called with startit() and the following ones with nextFeatStart()
+
+
+startit starts making a file then starts to split it up

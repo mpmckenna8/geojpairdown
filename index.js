@@ -8,17 +8,21 @@ var splitup = require('./splitup');
 
 
 module.exports = function(infi, outname){
-  var commandfi = process.argv[2] || infi;
+  var commandfi = infi || process.argv[2];
+
+  var outter = outname || process.arv[3];
+
+
 
   console.log('comm fi;', commandfi)
 
-    console.log(infi,outname)
+    console.log(infi,outter)
 
-    var geoStream = fs.createReadStream( infi); //.pipe(split('}'))
+    var geoStream = fs.createReadStream(infi); //.pipe(split('}'))
 
-    var jsonWriteStream = fs.createWriteStream(outname + 'feats.json');
+    var jsonWriteStream = fs.createWriteStream(outter + 'feats.json');
 
-    var geoJsonWrite = fs.createWriteStream(outname + ".geojson")
+    var geoJsonWrite = fs.createWriteStream(outter + ".geojson")
 
 
     var geoString = "";
@@ -32,7 +36,7 @@ module.exports = function(infi, outname){
 
     var begin = true;
 
-    geoStream.on('data', function(d){
+  geoStream.on('data', function(d){
       //console.log('data')
       if(d){
 
@@ -46,6 +50,7 @@ module.exports = function(infi, outname){
         begin = false;
       }
       else{
+        console.log('going to next blob')
         nextFeatures(d)
     // console.log(d.toString())
       }
@@ -54,7 +59,7 @@ module.exports = function(infi, outname){
 
     geoStream.on('end', function(d){
 
-    // console.log('stream done with ', typeof(geoString), geoString.length)
+  // console.log('stream done with ', typeof(geoString), geoString.length)
 
      //console.log(geoString)
      var go = JSON.parse(geoString);
@@ -80,13 +85,9 @@ module.exports = function(infi, outname){
 
 
 
-
-
-
     function startIt(q){
     //  var strbuff = .toString();
     //  find the "features" string and end the object there with a header
-
 
 
     //  console.log('index start of feats: ', q.toString().indexOf('features": ['))
@@ -94,77 +95,59 @@ module.exports = function(infi, outname){
 
       var geoStarter = q.toString().indexOf('features": [')
 
+      var featuresIndex = q.toString().slice(0, geoStarter+ ('features": [').length +1);
 
+    //  console.log('feat index?? this is written\n',featuresIndex)
 
-
-      var featuresIndex = q.toString().slice(0, geoStarter+ 12);
-
+      console.log('end of writin start')
       //write first part of geojson to file;
       geoJsonWrite.write(featuresIndex);
       jsonWriteStream.write('{');
 
-
       geojsonObjTester = JSON.parse(featuresIndex + "]\n}");
-    //  console.log('got a good start')
+      console.log('got a good start', geojsonObjTester)
 
       var features = '';
 
-    //  console.log(datString.slice(geoStarter+12).split('{ "type": "Feature"'))
-      var featArr =  datString.slice(geoStarter+12).split('{ "type": "Feature"');
 
-      var incomFeats = featArr.map(function(d){
-        var newfeature = '{ "type": "Feature"' + d;
+      //  console.log(datString.slice(geoStarter+12).split('{ "type": "Feature"'))
+      // slices off the intro part which was already written to the geojson
+      var featuresCutting = datString.slice( -(datString.length - (geoStarter + ('features":[').length)))
 
-        return newfeature;
-      })
+      console.log('cutting feats: ', featuresCutting);
 
-      finFeats = incomFeats.filter(function(d){
-    //    console.log(d.slice(-5))
+      var featArr = featuresCutting.split('{ "type": "Feature"'); //datString.slice(geoStarter+12).split('{ "type": "Feature"');
 
-        return d.slice(-2) === ",\n";
+// not sure why i have to do this
+      featArr.shift();
 
-      })
-
-        if(finFeats.length !=  featArr.length){
-
-          nextFeatStart = '{ "type": "Feature"' + featArr[featArr.length-1];
-
-      //    console.log('got this extra', nextFeatStart)
-        }
+      console.log('feat areay is: \n', featArr);
 
 
-        finFeats.map(function(mayFeat){
-            var comFeat = {}
-
-            geojsonObjTester.features.push((JSON.parse(mayFeat.slice(0,-2))))
-
-      //      console.log(geojsonObjTester)
-
-         if(comFeat === (mayFeat)){
-            console.log('compleeater')
-          }
-        })
-
-        console.log(GJV.valid(geojsonObjTester))
-
-        console.log('got ' + geojsonObjTester.features.length + ' valid features for this geojson');
-
-    //    console.log('finFeats in start ', finFeats)
-        var writeArr = splitup(finFeats);
-      //  console.log('things to write to file', writeArr[0].length)
-
-        writeToFile(writeArr);
+      console.log('end of feat array')
 
 
-        passedFeatCount = geojsonObjTester.features.length;
-        geojsonObjTester.features = [];
+      // makes the features into usable objects if possible.
+      var incomFeats = mapRest(featArr);
+
+
+      console.log('and the maped feats,', incomFeats)
+      // now filter out incomplete one and add to nextFeatStart
+
+      var filteredFeats = filterFeatures(incomFeats);
+
+      console.log('incomfeats here', JSON.parse(filteredFeats[1]))
+      console.log('ender')
+
+      var togo = splitup(filteredFeats);
+
+      console.log(togo)
+
+      writeToFile(togo);
+
 
 
     }
-
-
-
-
 
 
 
@@ -172,7 +155,7 @@ module.exports = function(infi, outname){
       // beginnging of the first objsct and then adding all those features to the geojsonObjTester.features
       //
       function nextFeatures(blob){
-      //  console.log(nextFeatStart + blob.toString())
+        console.log('nextFeats', nextFeatStart + blob.toString())
 
         geoJsonWrite.write(',\n');
         jsonWriteStream.write(',\n');
@@ -189,13 +172,12 @@ module.exports = function(infi, outname){
         //    console.log('wha')
             var featObj = JSON.parse(fea);
             geojsonObjTester.features.push(featObj);
+            return (fea + ',\n');
 
-            return (fea + ',\n')
           })
 
 
           var testbatch = GJV.valid(geojsonObjTester);
-
 
 
           if(testbatch){
@@ -204,10 +186,11 @@ module.exports = function(infi, outname){
 
         //  console.log('addto feats', (finFeats), newFeatArr)
         var writeArr = splitup(finFeats);
+
+
         writeToFile(writeArr);
 
       }
-
 
 
 
@@ -223,7 +206,6 @@ module.exports = function(infi, outname){
           return  d + '] } }';
         })
 
-
         var lastie = blah.pop();
 
         //console.log('need this')
@@ -234,6 +216,9 @@ module.exports = function(infi, outname){
 
         if(lastie.slice(-9) === ender){
           console.log('this is the end')
+          console.log(lastie)
+          lastie = lastie.slice(0, -9);
+          blah.push(lastie);
 
         }
         else{
@@ -284,5 +269,58 @@ module.exports = function(infi, outname){
       }
 
 
+      function jParseFeats(arrS){
+        var retArr = [];
+        for (i in arrS){
+         retArr.push( JSON.parse(arrS[i]))
+        }
+
+        return retArr;
+      }
+
+      function mapRest(featStrings){
+
+        var endfeat = featStrings.map(function(d){
+
+         var newfeature = '{ "type": "Feature"' + d;
+
+           console.log('end of feat', newfeature.slice(-4) === ']\n}\n');
+           // if the feature is the last one fix it
+           if(newfeature.slice(-4)=== ']\n}\n'){
+               console.log('last ending thing ');
+               newfeature = newfeature.slice( 0, newfeature.length-5 )
+           }
+           // take the , off the preceeding features
+           else if(newfeature.slice(-2) === ',\n'){
+             newfeature = newfeature.slice(0, newfeature.length-2);
+           }
+           //console.log('the newfeat:\n', newfeature);
+           return newfeature;
+       })
+
+       return endfeat;
+
+      }
+
+
+      // filter out incomplete one and add to nextFeatStart
+      function filterFeatures(fil){
+          var comFeats = [];
+
+          return fil.filter(function(d){
+            console.log(d.slice(-3))
+            if(d.slice(-5)=== '] } }'){
+              console.log('got a completeee');
+              return d;
+            }
+            else{
+              nextFeatStart += d;
+            }
+
+          })
+
+
+
+      }
 
 }

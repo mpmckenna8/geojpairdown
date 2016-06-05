@@ -2,6 +2,7 @@
 
 // splitup will take a array of geojson features and strip out out everything except the id, and return an array where the first is an array of geojson features and the second is an object with the ids as keys and properties stipped out as data
 module.exports = function(featArr){
+
     var geojsonFeats =[];
 
 //  Properties will be objects with a key of the osm_id
@@ -10,12 +11,20 @@ module.exports = function(featArr){
     var onFeat = {}
 
     for(i in featArr){
-      //  console.log('feat getting split, ', featArr[i]);
 
-      var jsonFeat = JSON.parse(featArr[i].slice(0,-2));
+        console.log('feat getting split, ', featArr[i]);
+      var jsonFeat;
+      if(featArr[i].slice(-2) === ',\n'){
+
+        jsonFeat = JSON.parse(featArr[i].slice(0,-2));
+      }
+      else{
+        jsonFeat = JSON.parse(featArr[i])
+      }
+    //  console.log('the jsonfeat', jsonFeat)
 
 
-        var pufeat = geojsonfeature(featArr[i]);
+        var pufeat = geojsonfeature(jsonFeat);
 
 
         geojsonFeats.push(pufeat);
@@ -37,7 +46,7 @@ module.exports = function(featArr){
 
 function geojsonfeature(feature, properties, geometry){
 
-  var featObj = JSON.parse(feature.slice(0,-2));
+  var featObj = feature;
 
   var idProp = featObj.properties['osm_id'];
 
@@ -46,7 +55,6 @@ function geojsonfeature(feature, properties, geometry){
     "type":featObj.type,
     "properties":{"osm_id": idProp},
     "geometry": featObj.geometry
-
   }
 
 
@@ -64,5 +72,6 @@ function slimprops  (props){
           endProps[propkeys[i]] = props[propkeys[i]];
         }
       }
+
     return endProps;
 }
